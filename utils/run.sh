@@ -1,0 +1,48 @@
+#!/bin/bash
+
+export REPO_HOME=`pwd`
+
+# Name things the right way
+DHDP_ZOOKEEPER_SERVER01=zookeeper-server01
+DHDP_ZOOKEEPER_SERVER02=zookeeper-server02
+DHDP_ZOOKEEPER_SERVER03=zookeeper-server03
+DHDP_HADOOP_MASTER01=hadoop-master01
+DHDP_HADOOP_WORKER01=hadoop-worker01
+DHDP_HADOOP_WORKER02=hadoop-worker02
+DHDP_HADOOP_WORKER03=hadoop-worker03
+DHDP_HBASE_MASTER01=hbase-master01
+DHDP_HBASE_WORKER01=hbase-worker01
+
+# Removing context containers
+CONTAINERS_NAME=''
+for CONTAINER in ${!DHDP_*}
+do
+	CONTAINERS_NAME="$CONTAINERS_NAME ${!CONTAINER}"
+done
+
+docker rm -f $CONTAINERS_NAME
+
+# Restarting Docker network
+echo "Restarting Docker network hadoopnet"
+docker network rm hdp.int
+docker network create hdp.int
+
+# Start Docker Zookeeper
+echo "Starting Zookeeper"
+docker run --name $DHDP_ZOOKEEPER_SERVER01 -P --net=hdp.int -itd -e ZOO_SERVER1="$DHDP_ZOOKEEPER_SERVER01:2888:3888" -e ZOO_SERVER2="$DHDP_ZOOKEEPER_SERVER02:2888:3888" -e ZOO_SERVER3="$DHDP_ZOOKEEPER_SERVER03:2888:3888" docker-hdp/zookeeper:1.0
+docker run --name $DHDP_ZOOKEEPER_SERVER02 -P --net=hdp.int -itd -e ZOO_SERVER1="$DHDP_ZOOKEEPER_SERVER01:2888:3888" -e ZOO_SERVER2="$DHDP_ZOOKEEPER_SERVER02:2888:3888" -e ZOO_SERVER3="$DHDP_ZOOKEEPER_SERVER03:2888:3888" docker-hdp/zookeeper:1.0
+docker run --name $DHDP_ZOOKEEPER_SERVER03 -P --net=hdp.int -itd -e ZOO_SERVER1="$DHDP_ZOOKEEPER_SERVER01:2888:3888" -e ZOO_SERVER2="$DHDP_ZOOKEEPER_SERVER02:2888:3888" -e ZOO_SERVER3="$DHDP_ZOOKEEPER_SERVER03:2888:3888" docker-hdp/zookeeper:1.0
+
+sleep 5
+
+# Start Docker Hadoop
+echo "Starting Hadoop"
+docker run --name $DHDP_HADOOP_MASTER01 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HDFS_SECONDARYNAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e YARN_RESOURCEMANAGER_HOSTNAME=$DHDP_HADOOP_MASTER01 docker-hdp/hadoop-master:1.0
+sleep 30
+docker run --name $DHDP_HADOOP_WORKER01 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HDFS_SECONDARYNAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e YARN_RESOURCEMANAGER_HOSTNAME=$DHDP_HADOOP_MASTER01 docker-hdp/hadoop-worker:1.0
+docker run --name $DHDP_HADOOP_WORKER02 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HDFS_SECONDARYNAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e YARN_RESOURCEMANAGER_HOSTNAME=$DHDP_HADOOP_MASTER01 docker-hdp/hadoop-worker:1.0
+docker run --name $DHDP_HADOOP_WORKER03 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HDFS_SECONDARYNAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e YARN_RESOURCEMANAGER_HOSTNAME=$DHDP_HADOOP_MASTER01 docker-hdp/hadoop-worker:1.0
+
+
+docker run --name $DHDP_HBASE_MASTER01 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HBASE_MASTER=1 docker-hdp/hbase-daemon:1.0
+docker run --name $DHDP_HBASE_WORKER01 -P --net=hdp.int -itd -e HDFS_NAMENODE_HOSTNAME=$DHDP_HADOOP_MASTER01 -e HBASE_REGIONSERVER=1 docker-hdp/hbase-daemon:1.0

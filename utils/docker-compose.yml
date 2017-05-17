@@ -1,0 +1,35 @@
+version: '3'
+services:
+  zookeeper:
+    image: docker-hdp/zookeeper:1.0
+    networks: 
+      - hdp.int
+    ports:
+      - "2181"
+  hadoop-master:
+    image: docker-hdp/hadoop-master:1.0
+    networks: 
+      - hdp.int
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9000"
+      - "14000"
+      - "50070"
+      - "50090"
+  hadoop-worker:
+    image: docker-hdp/hadoop-worker:1.0
+    networks: 
+      - hdp.int
+    depends_on:
+      hadoop-master:
+        condition: service_healthy
+    ports:
+      - "50010"
+      - "50020"
+      - "50075"
+
+networks:
+  hdp.int:
+    driver: default
