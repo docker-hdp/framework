@@ -1,0 +1,27 @@
+[submodule "centos-base"]
+	path = centos-base
+	url = https://github.com/docker-hdp/centos-base.git
+[submodule "conf"]
+	path = conf
+	url = https://github.com/docker-hdp/conf.git
+[submodule "hadoop-master"]
+	path = hadoop-master
+	url = https://github.com/docker-hdp/hadoop-master.git
+[submodule "hadoop-worker"]
+	path = hadoop-worker
+	url = https://github.com/docker-hdp/hadoop-worker.git
+[submodule "hbase-daemon"]
+	path = hbase-daemon
+	url = https://github.com/docker-hdp/hbase-daemon.git
+[submodule "hive-master"]
+	path = hive-master
+	url = https://github.com/docker-hdp/hive-master.git
+[submodule "hive-metastore"]
+	path = hive-metastore
+	url = https://github.com/docker-hdp/hive-metastore.git
+[submodule "solr"]
+	path = solr
+	url = https://github.com/docker-hdp/solr.git
+[submodule "zookeeper"]
+	path = zookeeper
+	url = https://github.com/docker-hdp/zookeeper.git
