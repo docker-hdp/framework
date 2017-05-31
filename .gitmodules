@@ -1,9 +1,9 @@
 [submodule "centos-base"]
 	path = centos-base
 	url = https://github.com/docker-hdp/centos-base.git
-[submodule "conf"]
+[submodule "config"]
 	path = conf
-	url = https://github.com/docker-hdp/conf.git
+	url = https://github.com/docker-hdp/config.git
 [submodule "hadoop-master"]
 	path = hadoop-master
 	url = https://github.com/docker-hdp/hadoop-master.git
